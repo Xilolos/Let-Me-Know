@@ -3,6 +3,7 @@
 import { createWatcher } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
+import Link from 'next/link';
 
 export default function NewWatcherPage() {
     const router = useRouter();
@@ -19,7 +20,7 @@ export default function NewWatcherPage() {
     };
 
     return (
-        <div className="page-container">
+        <div className="page-container new-page">
             <header>
                 <h1>New Watcher</h1>
             </header>
@@ -55,6 +56,57 @@ export default function NewWatcherPage() {
                     {isPending ? 'Creating Agent...' : 'Create Watcher'}
                 </button>
             </form>
+
+            <div className="close-btn-container">
+                <Link href="/" className="close-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </Link>
+            </div>
+
+            <style jsx>{`
+        .new-page {
+          min-height: 80vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding-bottom: 100px;
+        }
+
+        .close-btn-container {
+          position: fixed;
+          bottom: calc(20px + env(safe-area-inset-bottom));
+          left: 0;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          z-index: 1000;
+          pointer-events: none;
+        }
+
+        /* Target the Link component directly */
+        :global(.close-btn) {
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.15);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: transform 0.2s;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+          pointer-events: auto;
+          text-decoration: none;
+        }
+
+        :global(.close-btn:active) {
+          transform: scale(0.9);
+          background: rgba(255, 255, 255, 0.2);
+        }
+      `}</style>
         </div>
     );
 }

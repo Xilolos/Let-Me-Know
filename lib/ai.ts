@@ -51,8 +51,15 @@ export async function generateSearchQueries(topic: string): Promise<string[]> {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `
-    Generate 3 distinct Google search queries to find the latest news about: "${topic}".
-    One query should be broad, one specific, and one trying to find official announcements.
+    The user wants to find information about: "${topic}".
+    
+    This input is a description of what they care about, NOT necessarily a search query.
+    Your job is to translate this description into 3 distinct, effective Google search queries.
+    
+    1. One query should be broad to catch general news.
+    2. One query should be specific to the details mentioned.
+    3. One query should look for official announcements or press releases.
+    
     Return ONLY a JSON array of strings. Example: ["query 1", "query 2", "query 3"]
   `;
 

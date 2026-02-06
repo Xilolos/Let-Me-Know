@@ -33,7 +33,7 @@ export default function EditForm({ watcher }: { watcher: any }) {
             </div>
 
             <div className="field-group">
-                <label htmlFor="query">Query</label>
+                <label htmlFor="query">What should I look for?</label>
                 <textarea
                     name="query"
                     id="query"

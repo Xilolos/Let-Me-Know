@@ -13,7 +13,7 @@ export default async function Home() {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>Your Watchers</h1>
+        <h1>Let Me Know</h1>
         <ManualCheckButton />
       </header>
 

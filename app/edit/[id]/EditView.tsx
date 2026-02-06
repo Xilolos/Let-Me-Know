@@ -37,32 +37,31 @@ export default function EditView({ watcher }: { watcher: any }) {
 
         .close-btn-container {
           position: fixed;
-          bottom: 30px; /* Closer to bottom for easier reach */
+          bottom: calc(20px + env(safe-area-inset-bottom));
           left: 0;
           width: 100%;
           display: flex;
           justify-content: center;
-          z-index: 50;
-          pointer-events: none; /* Let clicks pass through container */
+          z-index: 1000; /* Ensure high layer */
+          pointer-events: none;
         }
 
-        /* Target the Link component directly since we apply class there */
-        /* Note: style-jsx might scope strictly, so we use global or ensure class matches */
+        /* Target the Link component directly */
         :global(.close-btn) {
           width: 64px;
           height: 64px;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.15); /* Slightly more visible */
           backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: var(--text-primary);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           transition: transform 0.2s;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-          pointer-events: auto; /* Re-enable clicks */
+          box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+          pointer-events: auto;
           text-decoration: none;
         }
 

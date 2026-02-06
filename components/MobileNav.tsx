@@ -1,81 +1,113 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function MobileNav() {
+  const router = useRouter();
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;
 
   if (pathname.startsWith('/edit/') || pathname === '/new') return null;
 
+  const handleNav = (path: string) => {
+    router.push(path);
+  };
+
   return (
     <nav className="mobile-nav">
-      <Link href="/" className={`nav-item ${isActive('/') ? 'active' : ''}`}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <div
+        onClick={() => handleNav('/')}
+        className={`nav-pill ${isActive('/') ? 'active' : ''}`}
+        role="button"
+      >
         <span>Dashboard</span>
-      </Link>
+      </div>
 
-      <Link href="/new" className="nav-fab">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-      </Link>
+      <div className="fab-wrapper">
+        <div
+          onClick={() => handleNav('/new')}
+          className="nav-fab"
+          role="button"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+      </div>
 
-      <Link href="/logs" className={`nav-item ${isActive('/logs') ? 'active' : ''}`}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      <div
+        onClick={() => handleNav('/logs')}
+        className={`nav-pill ${isActive('/logs') ? 'active' : ''}`}
+        role="button"
+      >
         <span>Results</span>
-      </Link>
+      </div>
 
       <style jsx>{`
         .mobile-nav {
           position: fixed;
-          bottom: 0;
+          bottom: calc(20px + env(safe-area-inset-bottom));
           left: 0;
           width: 100%;
-          height: calc(var(--nav-height) + var(--safe-area-bottom));
-          background: rgba(10, 10, 20, 0.85); /* Slightly darker than glass-panel */
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
           display: flex;
-          justify-content: space-around;
-          align-items: flex-start;
-          padding-top: 10px;
-          z-index: 100;
-          padding-bottom: var(--safe-area-bottom);
-        }
-
-        .nav-item {
-          display: flex;
-          flex-direction: column;
+          justify-content: center; /* Center everything */
           align-items: center;
-          text-decoration: none;
+          gap: 24px; /* Space between buttons */
+          z-index: 9999;
+          pointer-events: none; /* Container is passthrough */
+        }
+
+        .nav-pill {
+          pointer-events: auto; /* Catch clicks */
+          background: rgba(var(--bg-card-rgb), 0.85); /* Slightly more opaque */
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 12px 24px;
+          border-radius: 30px;
           color: var(--text-muted);
-          font-size: 0.75rem;
-          font-weight: 500;
-          gap: 4px;
-          width: 64px;
-        }
-
-        .nav-item.active {
-          color: var(--accent-primary);
-        }
-
-        .nav-fab {
-          background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-          width: 56px;
-          height: 56px;
-          border-radius: 50%;
+          font-weight: 600;
+          font-size: 0.9rem;
+          transition: transform 0.1s, background 0.2s, color 0.2s;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.25);
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-top: -30px; /* Pull up */
-          box-shadow: 0 8px 24px -6px var(--accent-primary);
-          transition: transform 0.2s;
+          cursor: pointer;
+          min-width: 110px; /* Ensure consistent width */
+          user-select: none;
         }
-        
-        .nav-fab:active {
+
+        .nav-pill:active {
             transform: scale(0.95);
+        }
+
+        .nav-pill.active {
+          background: rgba(255, 255, 255, 0.15);
+          color: var(--text-primary);
+          border-color: rgba(255, 255, 255, 0.3);
+          box-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        .fab-wrapper {
+            pointer-events: auto;
+        }
+
+        .nav-fab {
+          width: 56px; /* Slightly smaller to match pills better */
+          height: 56px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 8px 32px rgba(var(--accent-primary-rgb), 0.4); /* Colored shadow */
+          transition: transform 0.2s;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .nav-fab:active {
+            transform: scale(0.9);
         }
       `}</style>
     </nav>
