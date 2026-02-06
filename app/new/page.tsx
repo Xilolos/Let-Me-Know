@@ -42,13 +42,12 @@ export default function NewWatcherPage() {
                 </div>
 
                 <div className="field-group">
-                    <label htmlFor="urls">Target URLs (comma separated)</label>
+                    <label htmlFor="urls">Target URLs (Optional - Leave empty for Auto-Search)</label>
                     <textarea
                         name="urls"
                         id="urls"
                         rows={3}
-                        placeholder="https://stasys.gr, https://oasa.gr"
-                        required
+                        placeholder="Leave empty to let AI find sources..."
                     />
                 </div>
 

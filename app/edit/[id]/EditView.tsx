@@ -1,0 +1,76 @@
+'use client';
+
+import Link from 'next/link';
+import EditForm from './EditForm';
+
+export default function EditView({ watcher }: { watcher: any }) {
+  return (
+    <div className="edit-page">
+      <div className="glass-panel form-container">
+        <h2>Edit Watcher</h2>
+        <EditForm watcher={watcher} />
+      </div>
+
+      <div className="close-btn-container">
+        <Link href="/" className="close-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </Link>
+      </div>
+
+      <style jsx>{`
+        .edit-page {
+          min-height: 80vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding-bottom: 100px;
+        }
+
+        .form-container {
+          margin-bottom: 40px;
+        }
+
+        h2 {
+          margin-bottom: 20px;
+          text-align: center;
+        }
+
+        .close-btn-container {
+          position: fixed;
+          bottom: 30px; /* Closer to bottom for easier reach */
+          left: 0;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          z-index: 50;
+          pointer-events: none; /* Let clicks pass through container */
+        }
+
+        /* Target the Link component directly since we apply class there */
+        /* Note: style-jsx might scope strictly, so we use global or ensure class matches */
+        :global(.close-btn) {
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: var(--text-primary);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: transform 0.2s;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          pointer-events: auto; /* Re-enable clicks */
+          text-decoration: none;
+        }
+
+        :global(.close-btn:active) {
+          transform: scale(0.9);
+          background: rgba(255, 255, 255, 0.2);
+        }
+      `}</style>
+    </div>
+  );
+}

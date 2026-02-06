@@ -2,57 +2,83 @@
 
 import { useState } from 'react';
 import { toggleWatcherStatus, deleteWatcher } from '@/lib/actions';
+import { useRouter } from 'next/navigation';
 
 interface WatcherCardProps {
-    id: number;
-    name: string;
-    query: string;
-    status: string;
-    lastRunAt: Date | null;
+  id: number;
+  name: string;
+  query: string;
+  status: string;
+  lastRunAt: Date | null;
 }
 
 export default function WatcherCard({ id, name, query, status, lastRunAt }: WatcherCardProps) {
-    // Optimistic UI could be added here, but for simplicity relying on server revalidation
-    const [isDeleting, setIsDeleting] = useState(false);
+  // Optimistic UI could be added here, but for simplicity relying on server revalidation
+  const [isDeleting, setIsDeleting] = useState(false);
 
-    const handleDelete = async () => {
-        if (confirm('Are you sure you want to delete this watcher?')) {
-            setIsDeleting(true);
-            await deleteWatcher(id);
-        }
-    };
+  const router = useRouter();
 
-    return (
-        <div className={`glass-panel card ${status === 'paused' ? 'paused' : ''}`}>
-            <div className="card-header">
-                <div className="status-indicator" />
-                <h3>{name}</h3>
-                <button onClick={handleDelete} disabled={isDeleting} className="icon-btn delete-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-            </div>
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only navigate if we didn't click a button
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) return;
+    router.push(`/edit/${id}`);
+  };
 
-            <p className="query">"{query}"</p>
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this watcher?')) {
+      setIsDeleting(true);
+      await deleteWatcher(id);
+    }
+  };
 
-            <div className="card-footer">
-                <span className="last-run">
-                    {lastRunAt ? `Checked ${new Date(lastRunAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Never run'}
-                </span>
+  const handleToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleWatcherStatus(id, status);
+  }
 
-                <button
-                    onClick={() => toggleWatcherStatus(id, status)}
-                    className={`toggle-btn ${status}`}
-                >
-                    {status === 'active' ? 'Active' : 'Paused'}
-                </button>
-            </div>
+  return (
+    <div
+      onClick={handleCardClick}
+      className={`glass-panel card ${status === 'paused' ? 'paused' : ''}`}
+      role="button"
+      tabIndex={0}
+    >
+      <div className="card-header">
+        <div className="status-indicator" />
+        <h3>{name}</h3>
+        <button onClick={handleDelete} disabled={isDeleting} className="icon-btn delete-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+      </div>
 
-            <style jsx>{`
+      <p className="query">"{query}"</p>
+
+      <div className="card-footer">
+        <span className="last-run">
+          {lastRunAt ? `Checked ${new Date(lastRunAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Never run'}
+        </span>
+
+        <button
+          onClick={handleToggle}
+          className={`toggle-btn ${status}`}
+        >
+          {status === 'active' ? 'Active' : 'Paused'}
+        </button>
+      </div>
+
+      <style jsx>{`
         .card {
           margin-bottom: 16px;
           transition: transform 0.2s, opacity 0.2s;
           position: relative;
           overflow: hidden;
+          cursor: pointer;
+        }
+        
+        .card:active {
+            transform: scale(0.98);
         }
         
         .card.paused {
@@ -132,6 +158,6 @@ export default function WatcherCard({ id, name, query, status, lastRunAt }: Watc
           color: var(--error);
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
