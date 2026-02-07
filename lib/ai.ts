@@ -1,30 +1,56 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { HfInference } from '@huggingface/inference';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+// Helper to extract JSON from chatty responses
+function extractJson(text: string) {
+  try {
+    // 1. Try direct parse
+    return JSON.parse(text);
+  } catch (e) {
+    // 2. Try to find JSON block
+    const match = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch (e2) {
+        // ignore
+      }
+    }
+  }
+  return null;
+}
 
 export async function analyzeContent(query: string, content: string) {
-  if (!process.env.GEMINI_API_KEY) {
-    console.warn('GEMINI_API_KEY is not set');
+  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  if (!apiKey) {
+    console.warn('HUGGINGFACE_API_KEY is not set');
     return { relevant: false, summary: 'API Key missing' };
   }
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const hf = new HfInference(apiKey);
+  // Use Llama 3 8B Instruct - highly reliable on free tier
+  const model = "meta-llama/Meta-Llama-3-8B-Instruct";
+
+  // Truncate content further for open models to stay within context window safely
+  const safeContent = content.slice(0, 8000);
 
   const prompt = `
-    You are a helpful assistant for a user who wants to know about specific topics.
+    You are a helpful news assistant.
     
     USER QUERY: "${query}"
     
-    Below is the content of a webpage I just scraped:
+    WEBPAGE CONTENT:
     ---
-    ${content.slice(0, 20000)} 
+    ${safeContent}
     ---
     
-    Based on the content above, is there any NEW or RELEVANT information regarding the user's query?
-    If yes, summarize the news in 2-3 sentences.
-    If no, simply say "No relevant news found."
+    INSTRUCTIONS:
+    1. Analyze the content to see if it contains NEW or RELEVANT information about the USER QUERY.
+    2. If yes, summarize it in 2-3 sentences.
+    3. If no, say "No relevant news found."
     
-    Format your response as a JSON object:
+    CRITICAL: YOU MUST RETURN ONLY VALID JSON. NO MARKDOWN. NO PREAMBLE.
+    
+    JSON FORMAT:
     {
       "relevant": boolean,
       "summary": "string"
@@ -32,43 +58,68 @@ export async function analyzeContent(query: string, content: string) {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
+    const chatCompletion = await hf.chatCompletion({
+      model: model,
+      messages: [
+        { role: "system", content: "You are a JSON-only API. You must return raw JSON without markdown blocks." },
+        { role: "user", content: prompt }
+      ],
+      max_tokens: 500,
+      temperature: 0.1, // Low temp for deterministic format
+    });
 
-    // Clean up markdown code blocks if present
-    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(cleanText);
-  } catch (error) {
+    const text = chatCompletion.choices[0].message.content || "{}";
+    const data = extractJson(text);
+
+    if (!data) {
+      console.warn("HF returned invalid JSON:", text);
+      return { relevant: false, summary: "Error: AI response invalid" };
+    }
+
+    return data;
+
+  } catch (error: any) {
     console.error('AI Analysis Error:', error);
-    return { relevant: false, summary: 'Error analyzing content' };
+    const msg = error.message || 'Unknown error';
+    return { relevant: false, summary: `AI Analysis Failed: ${msg}`, error: true };
   }
 }
 
 export async function generateSearchQueries(topic: string): Promise<string[]> {
-  if (!process.env.GEMINI_API_KEY) return [topic];
+  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  if (!apiKey) return [topic];
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const hf = new HfInference(apiKey);
+  const model = "meta-llama/Meta-Llama-3-8B-Instruct";
 
   const prompt = `
     The user wants to find information about: "${topic}".
+    Translate this into 3 distinct, effective Google search queries.
     
-    This input is a description of what they care about, NOT necessarily a search query.
-    Your job is to translate this description into 3 distinct, effective Google search queries.
+    RULES:
+    1. Queries must be KEYWORD-BASED (concise).
+    2. Include "news", "latest", or "official".
     
-    1. One query should be broad to catch general news.
-    2. One query should be specific to the details mentioned.
-    3. One query should look for official announcements or press releases.
-    
-    Return ONLY a JSON array of strings. Example: ["query 1", "query 2", "query 3"]
+    CRITICAL: RETURN ONLY A JSON ARRAY OF STRINGS. NO MARKDOWN.
+    Example: ["query 1", "query 2", "query 3"]
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-    const queries = JSON.parse(text);
+    const chatCompletion = await hf.chatCompletion({
+      model: model,
+      messages: [
+        { role: "system", content: "You are a JSON-only API. You must return raw JSON without markdown blocks." },
+        { role: "user", content: prompt }
+      ],
+      max_tokens: 200,
+      temperature: 0.3,
+    });
+
+    const text = chatCompletion.choices[0].message.content || "[]";
+    const queries = extractJson(text);
+
     return Array.isArray(queries) ? queries : [topic];
-  } catch (e) {
+  } catch (e: any) {
     console.error('AI Query Gen Error:', e);
     return [topic];
   }

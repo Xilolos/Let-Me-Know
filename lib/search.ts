@@ -20,21 +20,29 @@ export async function searchWeb(query: string): Promise<string[]> {
         const links: string[] = [];
 
         // Select DDG result links
-        $('.result__a').each((i, el) => {
-            const href = $(el).attr('href');
-            if (href && !href.includes('duckduckgo.com')) {
-                // Decode the DDG redirect url if needed, or usually it's direct in html version?
-                // Actually DDG html often wraps in /l/?kh=-1&uddg=...
-                // Let's try to get the raw URL or decode it.
+        // Try multiple selectors as DDG HTML structure can vary
+        const selectors = ['.result__a', '.result__url', '.result__snippet'];
 
-                const urlObj = new URL(href, 'https://html.duckduckgo.com');
-                const realUrl = urlObj.searchParams.get('uddg');
-                if (realUrl) {
-                    links.push(realUrl);
-                } else if (href.startsWith('http')) {
-                    links.push(href);
+        selectors.forEach(selector => {
+            $(selector).each((i, el) => {
+                const href = $(el).attr('href');
+                if (href) {
+                    // 1. Handle DDG redirect links (//duckduckgo.com/l/?uddg=...)
+                    if (href.includes('duckduckgo.com/l/?')) {
+                        try {
+                            const urlObj = new URL(href, 'https://duckduckgo.com');
+                            const realUrl = urlObj.searchParams.get('uddg');
+                            if (realUrl) links.push(realUrl);
+                        } catch (e) {
+                            // ignore check
+                        }
+                    }
+                    // 2. Handle direct links (if any)
+                    else if (!href.includes('duckduckgo.com') && href.startsWith('http')) {
+                        links.push(href);
+                    }
                 }
-            }
+            });
         });
 
         // Return top 5 unique links

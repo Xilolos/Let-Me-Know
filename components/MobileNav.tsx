@@ -9,6 +9,7 @@ export default function MobileNav() {
   const isActive = (path: string) => pathname === path;
 
   if (pathname.startsWith('/edit/') || pathname === '/new') return null;
+  if (pathname === '/login') return null;
 
   const handleNav = (path: string) => {
     router.push(path);

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditForm from './EditForm';
+import TestRunPanel from '@/components/TestRunPanel';
 
 export default function EditView({ watcher }: { watcher: any }) {
   return (
@@ -9,6 +10,7 @@ export default function EditView({ watcher }: { watcher: any }) {
       <div className="glass-panel form-container">
         <h2>Edit Watcher</h2>
         <EditForm watcher={watcher} />
+        <TestRunPanel watcherId={watcher.id} />
       </div>
 
       <div className="close-btn-container">

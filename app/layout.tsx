@@ -6,7 +6,6 @@ import MobileNav from "@/components/MobileNav";
 export const metadata: Metadata = {
   title: "Let Me Know",
   description: "Your personalized AI web watcher",
-  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {

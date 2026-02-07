@@ -2,6 +2,7 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
 export const watchers = sqliteTable('watchers', {
     id: integer('id').primaryKey(),
+    userEmail: text('user_email'), // The owner of this watcher
     name: text('name').notNull(),
     query: text('query').notNull(), // What the user wants to know
     urls: text('urls').notNull(), // JSON array of URLs to check

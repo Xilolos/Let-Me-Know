@@ -45,6 +45,10 @@ next-env.d.ts
 sqlite.db
 sqlite.db-journal
 
+# caddy
+caddy_data/
+caddy_config/
+
 # local db
 sqlite.db
 sqlite.db-journal
