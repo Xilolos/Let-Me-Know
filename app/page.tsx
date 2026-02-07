@@ -8,6 +8,7 @@ import { runManualCheck } from '@/lib/actions';
 import ManualCheckButton from '@/components/ManualCheckButton';
 import WatcherCard from '@/components/WatcherCard';
 import { getUserEmail } from '@/lib/auth';
+import { getUserName } from '@/lib/username';
 import { redirect } from 'next/navigation';
 
 // Force dynamic since we're fetching from DB
@@ -15,6 +16,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const userEmail = await getUserEmail();
+  const userName = await getUserName();
 
   if (!userEmail) {
     redirect('/login');
@@ -37,11 +39,10 @@ export default async function Home() {
               width={32}
               height={32}
               className="app-logo"
-              priority
             />
             <h1>Let Me Know</h1>
           </div>
-          <p className="user-badge">{userEmail}</p>
+          {userName && <p className="user-badge">Hello, {userName}</p>}
         </div>
         <div className="header-right" style={{ display: 'flex', gap: '8px' }}>
           <ManualCheckButton />

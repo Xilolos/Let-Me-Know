@@ -19,6 +19,12 @@ export default function LoginPage() {
 
                 <form action={formAction} className="login-form">
                     <input
+                        type="text"
+                        name="username"
+                        placeholder="Your name"
+                        required
+                    />
+                    <input
                         type="email"
                         name="email"
                         placeholder="name@example.com"

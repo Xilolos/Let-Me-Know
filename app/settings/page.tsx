@@ -10,12 +10,16 @@ export default function SettingsPage() {
     const { accent, setAccent } = useAccent();
     const [mounted, setMounted] = useState(false);
     const [amoledMode, setAmoledMode] = useState(false);
+    const [searchInterval, setSearchInterval] = useState<number>(6);
 
     useEffect(() => {
         setMounted(true);
         // Load AMOLED preference
         const savedAmoled = localStorage.getItem('lmk-amoled') === 'true';
         setAmoledMode(savedAmoled);
+        // Load search interval preference
+        const savedInterval = localStorage.getItem('lmk-interval');
+        setSearchInterval(savedInterval ? parseInt(savedInterval) : 6);
     }, []);
 
     const toggleAmoled = () => {
@@ -24,6 +28,12 @@ export default function SettingsPage() {
         localStorage.setItem('lmk-amoled', newValue.toString());
         // Trigger event for AmoledProvider to pick up the change
         window.dispatchEvent(new Event('amoled-changed'));
+    };
+
+    const handleIntervalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = parseInt(e.target.value);
+        setSearchInterval(value);
+        localStorage.setItem('lmk-interval', value.toString());
     };
 
     if (!mounted) {
@@ -44,9 +54,31 @@ export default function SettingsPage() {
             </header>
 
             <div className="glass-panel">
+                <h2 className="section-title">General</h2>
+
                 <div className="setting-item">
                     <div className="setting-label">
-                        <h3>Appearance</h3>
+                        <h3>Search Interval</h3>
+                        <p>How often watchers should check for updates</p>
+                    </div>
+                    <select
+                        value={searchInterval}
+                        onChange={handleIntervalChange}
+                        className="interval-select"
+                    >
+                        <option value="6">Every 6 hours</option>
+                        <option value="12">Every 12 hours</option>
+                        <option value="24">Daily</option>
+                    </select>
+                </div>
+            </div>
+
+            <div className="glass-panel" style={{ marginTop: '20px' }}>
+                <h2 className="section-title">Appearance</h2>
+
+                <div className="setting-item">
+                    <div className="setting-label">
+                        <h3>Theme</h3>
                         <p>Choose your preferred theme</p>
                     </div>
 
@@ -124,6 +156,12 @@ export default function SettingsPage() {
             </div>
 
             <style jsx>{`
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+            color: var(--text-primary);
+        }
         .setting-item {
             display: flex;
             flex-direction: column;
@@ -245,6 +283,25 @@ export default function SettingsPage() {
         input:checked + .toggle-slider:before {
             transform: translateX(24px);
             background: white;
+        }
+        .interval-select {
+            padding: 10px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 160px;
+        }
+        .interval-select:hover {
+            border-color: var(--accent-primary);
+        }
+        .interval-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.1);
         }
       `}</style>
         </div>
