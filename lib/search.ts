@@ -2,53 +2,51 @@ import * as cheerio from 'cheerio';
 
 export async function searchWeb(query: string): Promise<string[]> {
     try {
-        const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+        // Use Bing News RSS (Reliable, provides target URL in query param)
+        const searchUrl = `https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=RSS`;
+
+        console.log(`[Search] Fetching RSS: ${searchUrl}`);
 
         const response = await fetch(searchUrl, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            },
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            }
         });
 
         if (!response.ok) {
-            console.error('Search failed:', response.statusText);
+            console.error('[Search] RSS failed:', response.statusText);
             return [];
         }
 
-        const html = await response.text();
-        const $ = cheerio.load(html);
+        const xml = await response.text();
+        const $ = cheerio.load(xml, { xmlMode: true });
         const links: string[] = [];
 
-        // Select DDG result links
-        // Try multiple selectors as DDG HTML structure can vary
-        const selectors = ['.result__a', '.result__url', '.result__snippet'];
-
-        selectors.forEach(selector => {
-            $(selector).each((i, el) => {
-                const href = $(el).attr('href');
-                if (href) {
-                    // 1. Handle DDG redirect links (//duckduckgo.com/l/?uddg=...)
-                    if (href.includes('duckduckgo.com/l/?')) {
-                        try {
-                            const urlObj = new URL(href, 'https://duckduckgo.com');
-                            const realUrl = urlObj.searchParams.get('uddg');
-                            if (realUrl) links.push(realUrl);
-                        } catch (e) {
-                            // ignore check
-                        }
+        $('item').each((i, el) => {
+            const link = $(el).find('link').text();
+            if (link) {
+                // Bing links are like: http://www.bing.com/news/apiclick.aspx?...&url=https%3a%2f%2f...
+                try {
+                    const urlObj = new URL(link);
+                    const realUrl = urlObj.searchParams.get('url');
+                    if (realUrl) {
+                        links.push(realUrl);
+                    } else {
+                        links.push(link); // Fallback to original if no url param
                     }
-                    // 2. Handle direct links (if any)
-                    else if (!href.includes('duckduckgo.com') && href.startsWith('http')) {
-                        links.push(href);
-                    }
+                } catch (e) {
+                    links.push(link);
                 }
-            });
+            }
         });
+
+        console.log(`[Search] Found ${links.length} items`);
 
         // Return top 5 unique links
         return Array.from(new Set(links)).slice(0, 5);
+
     } catch (error) {
-        console.error('Search Error:', error);
+        console.error('[Search] Error:', error);
         return [];
     }
 }

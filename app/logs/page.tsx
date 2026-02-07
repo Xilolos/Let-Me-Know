@@ -1,10 +1,15 @@
 import { db } from '@/lib/db';
 import { results, watchers } from '@/lib/schema';
 import { desc, eq } from 'drizzle-orm';
+import { getUserEmail } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default async function LogsPage() {
+    const userEmail = await getUserEmail();
+    if (!userEmail) redirect('/login');
+
     const allResults = await db.select({
         id: results.id,
         content: results.content,
@@ -13,6 +18,7 @@ export default async function LogsPage() {
     })
         .from(results)
         .leftJoin(watchers, eq(results.watcherId, watchers.id))
+        .where(eq(watchers.userEmail, userEmail))
         .orderBy(desc(results.foundAt));
 
     return (
