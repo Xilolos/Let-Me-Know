@@ -52,7 +52,7 @@ export async function runManualCheck() {
     const { getUserEmail } = await import('./auth');
     const userEmail = await getUserEmail();
 
-    if (!userEmail) return { success: false, error: 'Not logged in' };
+    if (!userEmail) return { success: false, error: 'Not logged in', logs: [] };
 
     const { processActiveWatchers } = await import('./process');
     // Only process THIS user's watchers to avoid timeouts
@@ -151,7 +151,7 @@ export async function testWatcher(id: number) {
 
     // 4. Analyze
     const { analyzeContent } = await import('./ai');
-    const analysis = await analyzeContent(watcher.query, content);
+    const analysis = await analyzeContent(watcher.query, [{ url: urlToCheck, content }]);
 
     return {
         success: true,

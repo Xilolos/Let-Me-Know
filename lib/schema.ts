@@ -17,6 +17,7 @@ export const results = sqliteTable('results', {
     id: integer('id').primaryKey(),
     watcherId: integer('watcher_id').references(() => watchers.id),
     content: text('content').notNull(), // Markdown summary
+    sources: text('sources'), // JSON array of { name: string, url: string }
     foundAt: integer('found_at', { mode: 'timestamp' }).default(new Date()),
     isRead: integer('is_read', { mode: 'boolean' }).default(false),
 });

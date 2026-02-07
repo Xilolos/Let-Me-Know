@@ -39,46 +39,15 @@ export default function ManualCheckButton() {
             <span className="sr-only">{loading ? 'Running...' : 'Run Check'}</span>
 
             <style jsx>{`
-            /* ... existing styles ... */
-            .sr-only {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip: rect(0, 0, 0, 0);
-                white-space: nowrap;
-                border: 0;
+            .spinning svg {
+                animation: spin 1s linear infinite;
             }
-            /* ... ensure previous styles are preserved or use the previous block */
-        .icon-btn {
-          padding: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          color: var(--text-muted);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 8px;
-          background: transparent;
-          transition: all 0.2s;
-        }
 
-        .icon-btn:hover {
-            background: rgba(255,255,255,0.05);
-            color: var(--text-primary);
-        }
-        
-        .spinning svg {
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-      `}</style>
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `}</style>
         </button>
     );
 }

@@ -1,11 +1,12 @@
+
 import Link from 'next/link';
+import Image from 'next/image';
 import { db } from '@/lib/db';
 import { watchers } from '@/lib/schema';
 import { eq, desc } from 'drizzle-orm';
 import { runManualCheck } from '@/lib/actions';
 import ManualCheckButton from '@/components/ManualCheckButton';
 import WatcherCard from '@/components/WatcherCard';
-import LogoutButton from '@/components/LogoutButton';
 import { getUserEmail } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
@@ -30,14 +31,20 @@ export default async function Home() {
       <header className="dashboard-header">
         <div className="header-left">
           <div className="logo-container">
-            <img src="/logo.JPG" alt="LMK Logo" className="app-logo" />
+            <Image
+              src="/icon.png"
+              alt="LMK Logo"
+              width={32}
+              height={32}
+              className="app-logo"
+              priority
+            />
             <h1>Let Me Know</h1>
           </div>
           <p className="user-badge">{userEmail}</p>
         </div>
         <div className="header-right" style={{ display: 'flex', gap: '8px' }}>
           <ManualCheckButton />
-          <LogoutButton />
         </div>
       </header>
 
@@ -49,11 +56,12 @@ export default async function Home() {
         </div>
       ) : (
         <div className="watchers-grid">
-          {allWatchers.map((watcher) => (
+          {allWatchers.map((watcher, idx) => (
             <WatcherCard
               key={watcher.id}
               {...watcher}
               status={watcher.status || 'active'}
+              index={idx}
             />
           ))}
         </div>

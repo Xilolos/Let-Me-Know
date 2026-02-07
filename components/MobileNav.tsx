@@ -2,6 +2,8 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 
+import { User, Settings, Home, Bell } from 'lucide-react';
+
 export default function MobileNav() {
   const router = useRouter();
   const pathname = usePathname();
@@ -17,12 +19,25 @@ export default function MobileNav() {
 
   return (
     <nav className="mobile-nav">
+
+      {/* Account Tab (Left) */}
+      <div
+        onClick={() => handleNav('/account')}
+        className={`nav-pill ${isActive('/account') ? 'active' : ''}`}
+        role="button"
+      >
+        <User size={20} />
+        <span className="sr-only">Account</span>
+      </div>
+
+      {/* Dashboard (Middle Left) */}
       <div
         onClick={() => handleNav('/')}
         className={`nav-pill ${isActive('/') ? 'active' : ''}`}
         role="button"
       >
-        <span>Dashboard</span>
+        <Home size={20} />
+        <span className="sr-only">Home</span>
       </div>
 
       <div className="fab-wrapper">
@@ -35,82 +50,26 @@ export default function MobileNav() {
         </div>
       </div>
 
+      {/* Results (Middle Right) */}
       <div
         onClick={() => handleNav('/logs')}
         className={`nav-pill ${isActive('/logs') ? 'active' : ''}`}
         role="button"
       >
-        <span>Results</span>
+        <Bell size={20} />
+        <span className="sr-only">Results</span>
       </div>
 
-      <style jsx>{`
-        .mobile-nav {
-          position: fixed;
-          bottom: calc(20px + env(safe-area-inset-bottom));
-          left: 0;
-          width: 100%;
-          display: flex;
-          justify-content: center; /* Center everything */
-          align-items: center;
-          gap: 24px; /* Space between buttons */
-          z-index: 9999;
-          pointer-events: none; /* Container is passthrough */
-        }
+      {/* Settings Tab (Right) */}
+      <div
+        onClick={() => handleNav('/settings')}
+        className={`nav-pill ${isActive('/settings') ? 'active' : ''}`}
+        role="button"
+      >
+        <Settings size={20} />
+        <span className="sr-only">Settings</span>
+      </div>
 
-        .nav-pill {
-          pointer-events: auto; /* Catch clicks */
-          background: rgba(var(--bg-card-rgb), 0.85); /* Slightly more opaque */
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          padding: 12px 24px;
-          border-radius: 30px;
-          color: var(--text-muted);
-          font-weight: 600;
-          font-size: 0.9rem;
-          transition: transform 0.1s, background 0.2s, color 0.2s;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          min-width: 110px; /* Ensure consistent width */
-          user-select: none;
-        }
-
-        .nav-pill:active {
-            transform: scale(0.95);
-        }
-
-        .nav-pill.active {
-          background: rgba(255, 255, 255, 0.15);
-          color: var(--text-primary);
-          border-color: rgba(255, 255, 255, 0.3);
-          box-shadow: 0 0 15px rgba(255,255,255,0.1);
-        }
-
-        .fab-wrapper {
-            pointer-events: auto;
-        }
-
-        .nav-fab {
-          width: 56px; /* Slightly smaller to match pills better */
-          height: 56px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 8px 32px rgba(var(--accent-primary-rgb), 0.4); /* Colored shadow */
-          transition: transform 0.2s;
-          cursor: pointer;
-          user-select: none;
-        }
-
-        .nav-fab:active {
-            transform: scale(0.9);
-        }
-      `}</style>
     </nav>
   );
 }

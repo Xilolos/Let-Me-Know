@@ -57,55 +57,69 @@ export async function processActiveWatchers(targetUserEmail?: string) {
                 if (urls.length > 0) {
                     const findings: { source: string; summary: string; link: string }[] = [];
 
-                    for (const url of urls) {
-                        // Scrape
-                        const content = await scrapeUrl(url);
-                        if (!content) {
-                            logs.push(`Failed to scrape ${url}`);
-                            continue;
-                        }
+                    // Scrape all URLs first
+                    const validSources: { url: string; content: string }[] = [];
 
-                        // Analyze
+                    // Limit to 5 URLs max for consensus to avoid token limits
+                    const limitedUrls = urls.slice(0, 5);
+
+                    for (const url of limitedUrls) {
+                        const content = await scrapeUrl(url);
+                        if (content) {
+                            validSources.push({ url, content });
+                        }
+                        // Small delay to be polite
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+
+                    if (validSources.length > 0) {
+                        logs.push(`Analyzing ${validSources.length} sources for consensus...`);
+
                         try {
-                            const analysis = await analyzeContent(watcher.query, content);
+                            // Analyze all sources together
+                            const analysis = await analyzeContent(watcher.query, validSources);
 
                             if (analysis.relevant) {
+                                // Prepare sources metadata for DB
+                                const sourcesMeta = validSources.map(s => ({
+                                    name: new URL(s.url).hostname.replace('www.', ''),
+                                    url: s.url
+                                }));
+
                                 await db.insert(results).values({
                                     watcherId: watcher.id,
                                     content: analysis.summary,
+                                    sources: JSON.stringify(sourcesMeta),
                                     foundAt: new Date(),
                                     isRead: false,
                                 });
-                                logs.push(`Found info for ${watcher.name} on ${url}`);
+                                logs.push(`Consensus found for ${watcher.name}`);
 
-                                findings.push({
-                                    source: url,
-                                    summary: analysis.summary,
-                                    link: url
-                                });
+                                // Send Email
+                                const recipient = watcher.userEmail || process.env.EMAIL_TO || process.env.EMAIL_USER;
+                                if (process.env.EMAIL_USER && recipient) {
+                                    const { sendNotification } = await import('@/lib/email');
+                                    await sendNotification(
+                                        recipient,
+                                        watcher.name,
+                                        [{
+                                            source: "Consensus Summary",
+                                            summary: analysis.summary,
+                                            link: `http://localhost:3000/logs` // Link to dashboard to see sources
+                                        }]
+                                    );
+                                    logs.push(`Email sent to ${recipient}`);
+                                }
+                            } else {
+                                logs.push(`No relevant news found in consensus.`);
                             }
-                            // Delay between analysis calls
-                            await new Promise(r => setTimeout(r, 4000));
                         } catch (err) {
-                            console.error(`Analysis failed for ${url}:`, err);
-                            logs.push(`Analysis failed for ${url}`);
+                            console.error(`Consensus analysis failed:`, err);
+                            logs.push(`Consensus analysis failed`);
                         }
+                    } else {
+                        logs.push(`No valid content scraped for watcher ${watcher.name}`);
                     }
-
-                    // Send Aggregated Email
-                    const recipient = watcher.userEmail || process.env.EMAIL_TO || process.env.EMAIL_USER;
-
-                    if (findings.length > 0 && process.env.EMAIL_USER && recipient) {
-                        const { sendNotification } = await import('@/lib/email');
-                        await sendNotification(
-                            recipient,
-                            watcher.name,
-                            findings
-                        );
-                        logs.push(`Summary email sent to ${recipient} with ${findings.length} updates`);
-                    }
-                } else {
-                    logs.push(`No URLs found for watcher ${watcher.name}`);
                 }
 
                 // Update Last Run if successful (or even if no URLs found, to avoid stuck state)

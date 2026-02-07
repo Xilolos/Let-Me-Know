@@ -10,9 +10,10 @@ interface WatcherCardProps {
   query: string;
   status: string;
   lastRunAt: Date | null;
+  index: number;
 }
 
-export default function WatcherCard({ id, name, query, status, lastRunAt }: WatcherCardProps) {
+export default function WatcherCard({ id, name, query, status, lastRunAt, index }: WatcherCardProps) {
   // Optimistic UI could be added here, but for simplicity relying on server revalidation
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -75,6 +76,9 @@ export default function WatcherCard({ id, name, query, status, lastRunAt }: Watc
           position: relative;
           overflow: hidden;
           cursor: pointer;
+          opacity: 0; /* Start hidden for animation */
+          animation: blurIn 0.5s ease-out forwards;
+          animation-delay: ${index * 0.1}s;
         }
         
         .card:active {

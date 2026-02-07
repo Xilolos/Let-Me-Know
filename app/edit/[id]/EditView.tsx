@@ -21,11 +21,11 @@ export default function EditView({ watcher }: { watcher: any }) {
 
       <style jsx>{`
         .edit-page {
-          min-height: 80vh;
+          min-height: 100vh;
           display: flex;
           flex-direction: column;
-          justify-content: center;
-          padding-bottom: 100px;
+          padding-top: calc(20px + env(safe-area-inset-top)); /* Clear Dynamic Island but strictly align */
+          padding-bottom: 120px;
         }
 
         .form-container {

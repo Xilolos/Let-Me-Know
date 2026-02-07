@@ -4,6 +4,8 @@ import { desc, eq } from 'drizzle-orm';
 import { getUserEmail } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
+import ResultCard from '@/components/ResultCard';
+
 export const dynamic = 'force-dynamic';
 
 export default async function LogsPage() {
@@ -13,6 +15,7 @@ export default async function LogsPage() {
     const allResults = await db.select({
         id: results.id,
         content: results.content,
+        sources: results.sources,
         foundAt: results.foundAt,
         watcherName: watchers.name
     })
@@ -22,8 +25,8 @@ export default async function LogsPage() {
         .orderBy(desc(results.foundAt));
 
     return (
-        <div className="logs-page">
-            <header>
+        <div className="page-container">
+            <header className="dashboard-header">
                 <h1>Notifications</h1>
             </header>
 
@@ -35,17 +38,13 @@ export default async function LogsPage() {
             ) : (
                 <div className="timeline">
                     {allResults.map((result) => (
-                        <div key={result.id} className="glass-panel log-item">
-                            <div className="log-header">
-                                <span className="watcher-tag">{result.watcherName}</span>
-                                <span className="timestamp">
-                                    {result.foundAt ? new Date(result.foundAt).toLocaleString() : ''}
-                                </span>
-                            </div>
-                            <div className="log-content">
-                                {result.content}
-                            </div>
-                        </div>
+                        <ResultCard
+                            key={result.id}
+                            watcherName={result.watcherName || 'Unknown'}
+                            content={result.content}
+                            sources={result.sources}
+                            foundAt={result.foundAt}
+                        />
                     ))}
                 </div>
             )}

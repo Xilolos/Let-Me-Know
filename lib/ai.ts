@@ -19,7 +19,7 @@ function extractJson(text: string) {
   return null;
 }
 
-export async function analyzeContent(query: string, content: string) {
+export async function analyzeContent(query: string, sources: { url: string; content: string }[]) {
   const apiKey = process.env.HUGGINGFACE_API_KEY;
   if (!apiKey) {
     console.warn('HUGGINGFACE_API_KEY is not set');
@@ -27,33 +27,39 @@ export async function analyzeContent(query: string, content: string) {
   }
 
   const hf = new HfInference(apiKey);
-  // Use Llama 3 8B Instruct - highly reliable on free tier
   const model = "meta-llama/Meta-Llama-3-8B-Instruct";
 
-  // Truncate content further for open models to stay within context window safely
-  const safeContent = content.slice(0, 8000);
+  // Prepare content for prompt
+  // Limit total size to avoid context overflow. 
+  // ~2000 chars per source for 3-4 sources max.
+  const combinedContent = sources.map((s, i) => `
+    SOURCE ${i + 1} (${s.url}):
+    """
+    ${s.content.slice(0, 2000)}
+    """
+  `).join('\n\n');
 
   const prompt = `
-    You are a helpful news assistant.
+    You are a smart news analyst.
     
-    USER QUERY: "${query}"
+    USER TOPIC: "${query}"
     
-    WEBPAGE CONTENT:
-    ---
-    ${safeContent}
-    ---
+    BELOW ARE NEWS EXCERPTS FROM MULTIPLE SOURCES:
+    ${combinedContent}
     
     INSTRUCTIONS:
-    1. Analyze the content to see if it contains NEW or RELEVANT information about the USER QUERY.
-    2. If yes, summarize it in 2-3 sentences.
-    3. If no, say "No relevant news found."
+    1. Read all sources.
+    2. Determine if there is meaningful news about the USER TOPIC.
+    3. Synthesize a "Consensus Summary" that combines facts from these sources.
+    4. If sources disagree, note the conflict.
+    5. If no relevant news is found in ANY source, set "relevant": false.
     
-    CRITICAL: YOU MUST RETURN ONLY VALID JSON. NO MARKDOWN. NO PREAMBLE.
+    CRITICAL: RETURN ONLY VALID JSON.
     
     JSON FORMAT:
     {
       "relevant": boolean,
-      "summary": "string"
+      "summary": "Concise consensus summary (2-4 sentences)."
     }
   `;
 
@@ -61,11 +67,11 @@ export async function analyzeContent(query: string, content: string) {
     const chatCompletion = await hf.chatCompletion({
       model: model,
       messages: [
-        { role: "system", content: "You are a JSON-only API. You must return raw JSON without markdown blocks." },
+        { role: "system", content: "You are a JSON-only API. You must return raw JSON without markdown." },
         { role: "user", content: prompt }
       ],
-      max_tokens: 500,
-      temperature: 0.1, // Low temp for deterministic format
+      max_tokens: 600,
+      temperature: 0.2,
     });
 
     const text = chatCompletion.choices[0].message.content || "{}";
