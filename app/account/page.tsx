@@ -60,7 +60,7 @@ export default function AccountPage() {
 
     return (
         <div className="page-container">
-            <header className="dashboard-header">
+            <header className="dashboard-header sticky-header">
                 <h1>Account</h1>
             </header>
 

@@ -22,7 +22,7 @@ export default function NewWatcherForm() {
 
     return (
         <div className="page-container new-page">
-            <header>
+            <header className="sticky-header">
                 <h1>New Watcher</h1>
             </header>
 

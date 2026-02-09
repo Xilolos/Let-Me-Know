@@ -7,8 +7,10 @@ import TestRunPanel from '@/components/TestRunPanel';
 export default function EditView({ watcher }: { watcher: any }) {
   return (
     <div className="edit-page">
+      <header className="sticky-header">
+        <h1>Edit Watcher</h1>
+      </header>
       <div className="glass-panel form-container">
-        <h2>Edit Watcher</h2>
         <EditForm watcher={watcher} />
         <TestRunPanel watcherId={watcher.id} />
       </div>
@@ -24,17 +26,13 @@ export default function EditView({ watcher }: { watcher: any }) {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
-          padding-top: calc(20px + env(safe-area-inset-top)); /* Clear Dynamic Island but strictly align */
+          /* Padding top handled by sticky header */
+          padding-top: 20px; 
           padding-bottom: 120px;
         }
 
         .form-container {
           margin-bottom: 40px;
-        }
-
-        h2 {
-          margin-bottom: 20px;
-          text-align: center;
         }
 
         .close-btn-container {

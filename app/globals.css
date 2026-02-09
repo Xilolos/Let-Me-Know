@@ -30,6 +30,10 @@
   /* Spacing */
   --safe-area-bottom: env(safe-area-inset-bottom);
   --nav-height: 64px;
+
+  /* RGB Values for Glass Effects */
+  --bg-primary-rgb: 250, 250, 255;
+  /* Corresponds to hsl(250, 20%, 98%) */
 }
 
 /* DARK MODE (Override) */
@@ -52,6 +56,9 @@
   --bg-toggle: rgba(0, 0, 0, 0.2);
   --bg-item: rgba(255, 255, 255, 0.05);
   --bg-tag: rgba(255, 255, 255, 0.1);
+
+  --bg-primary-rgb: 15, 15, 20;
+  /* Corresponds to hsl(250, 20%, 8%) */
 }
 
 /* AMOLED MODE (Pure Black) */
@@ -74,6 +81,8 @@
   --bg-toggle: rgba(255, 255, 255, 0.05);
   --bg-item: rgba(255, 255, 255, 0.05);
   --bg-tag: rgba(255, 255, 255, 0.15);
+
+  --bg-primary-rgb: 0, 0, 0;
 }
 
 * {
@@ -189,31 +198,6 @@ textarea:focus {
   border-color: var(--accent-primary);
 }
 
-/* Dashboard Styles */
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-  margin-top: 20px;
-}
-
-.header-left {
-  display: flex;
-  flex-direction: column;
-}
-
-.dashboard-header h1 {
-  margin-bottom: 4px;
-  line-height: 1.1;
-}
-
-.user-badge {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
 .icon-btn {
   padding: 8px;
   display: flex;
@@ -234,6 +218,34 @@ textarea:focus {
 
 .icon-btn:active {
   transform: scale(0.95);
+}
+
+/* Sticky Header Utility */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: var(--bg-primary);
+  /* Fallback or solid if needed, but glass is better */
+  background: rgba(var(--bg-primary-rgb), 0.85);
+  /* Need to ensure rgb vars exist or use color-mix */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  margin-top: -20px;
+  /* Counteract page padding */
+  padding-top: calc(20px + env(safe-area-inset-top));
+  padding-bottom: 12px;
+  margin-left: -20px;
+  margin-right: -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 24px;
+}
+
+/* Ensure dark mode / themes work */
+.sticky-header h1 {
+  margin-bottom: 0;
 }
 
 .empty-state {

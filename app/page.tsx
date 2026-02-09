@@ -30,7 +30,7 @@ export default async function Home() {
 
   return (
     <div className="page-container">
-      <header className="dashboard-header">
+      <header className="dashboard-header sticky-header">
         <div className="header-left">
           <div className="logo-container">
             <Image

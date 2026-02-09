@@ -51,10 +51,10 @@ export default function RootLayout({
                 {children}
               </main>
               <ProgressBar />
-              <MobileNav />
               <ServiceWorkerRegister />
             </AmoledProvider>
           </AccentProvider>
+          <MobileNav />
         </ThemeProvider>
       </body>
     </html>

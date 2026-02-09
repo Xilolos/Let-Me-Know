@@ -49,7 +49,7 @@ export default function SettingsPage() {
 
     return (
         <div className="page-container">
-            <header className="dashboard-header">
+            <header className="dashboard-header sticky-header">
                 <h1>Settings</h1>
             </header>
 
