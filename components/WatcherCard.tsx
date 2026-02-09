@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { toggleWatcherStatus, deleteWatcher } from '@/lib/actions';
+import { toggleWatcherStatus, deleteWatcher, runManualCheck } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
+import { Play } from 'lucide-react';
 
 interface WatcherCardProps {
   id: number;
@@ -16,6 +17,7 @@ interface WatcherCardProps {
 export default function WatcherCard({ id, name, query, status, lastRunAt, index }: WatcherCardProps) {
   // Optimistic UI could be added here, but for simplicity relying on server revalidation
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
 
   const router = useRouter();
 
@@ -39,6 +41,23 @@ export default function WatcherCard({ id, name, query, status, lastRunAt, index 
     toggleWatcherStatus(id, status);
   }
 
+  const handleRunOnce = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsChecking(true);
+    try {
+      const result = await runManualCheck(id);
+      if (result.success) {
+        alert(`Check complete for "${name}"!`);
+      } else {
+        alert(`Check failed: ${result.error}`);
+      }
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setIsChecking(false);
+    }
+  }
+
   return (
     <div
       onClick={handleCardClick}
@@ -49,6 +68,16 @@ export default function WatcherCard({ id, name, query, status, lastRunAt, index 
       <div className="card-header">
         <div className="status-indicator" />
         <h3>{name}</h3>
+
+        <button
+          onClick={handleRunOnce}
+          disabled={isChecking}
+          className={`icon-btn run-btn ${isChecking ? 'spinning' : ''}`}
+          title="Run this watcher now"
+        >
+          <Play size={16} fill={isChecking ? "currentColor" : "none"} />
+        </button>
+
         <button onClick={handleDelete} disabled={isDeleting} className="icon-btn delete-btn">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </button>
@@ -155,11 +184,36 @@ export default function WatcherCard({ id, name, query, status, lastRunAt, index 
           border: none;
           color: var(--text-muted);
           cursor: pointer;
-          padding: 4px;
+          padding: 8px; /* Increased touch target */
+          border-radius: 8px;
+          display: flex; /* Ensure center alignment */
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
         
         .delete-btn:hover {
           color: var(--error);
+          background: rgba(var(--error), 0.1); /* Subtle red bg context if possible, or just --bg-secondary */
+        }
+
+        .run-btn:hover {
+            color: var(--accent-primary);
+        }
+
+        .spinning {
+            animation: spin 1s linear infinite;
+            color: var(--accent-primary);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
       `}</style>
     </div>

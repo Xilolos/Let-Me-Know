@@ -59,7 +59,7 @@ export async function toggleWatcherStatus(id: number, currentStatus: string) {
     revalidatePath('/');
 }
 
-export async function runManualCheck() {
+export async function runManualCheck(id?: number) {
     const { getUserEmail } = await import('./auth');
     const userEmail = await getUserEmail();
 
@@ -67,7 +67,7 @@ export async function runManualCheck() {
 
     const { processActiveWatchers } = await import('./process');
     // Only process THIS user's watchers to avoid timeouts
-    const result = await processActiveWatchers(userEmail);
+    const result = await processActiveWatchers(userEmail, id);
 
     revalidatePath('/');
     revalidatePath('/logs');

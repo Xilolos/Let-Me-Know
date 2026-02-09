@@ -7,12 +7,15 @@ import { analyzeContent, generateSearchQueries } from '@/lib/ai';
 
 // ... imports
 
-export async function processActiveWatchers(targetUserEmail?: string) {
+export async function processActiveWatchers(targetUserEmail?: string, targetWatcherId?: number) {
     const logs: string[] = [];
     try {
         const conditions = [eq(watchers.status, 'active')];
         if (targetUserEmail) {
             conditions.push(eq(watchers.userEmail, targetUserEmail));
+        }
+        if (targetWatcherId) {
+            conditions.push(eq(watchers.id, targetWatcherId));
         }
 
         const activeWatchers = await db.select().from(watchers).where(and(...conditions));
