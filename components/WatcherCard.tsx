@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toggleWatcherStatus, deleteWatcher, runManualCheck } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import { Play } from 'lucide-react';
+import { formatTime, calculateNextRun } from '@/lib/timeFormat';
 
 interface WatcherCardProps {
   id: number;
@@ -11,15 +12,36 @@ interface WatcherCardProps {
   query: string;
   status: string;
   lastRunAt: Date | null;
+  schedule: string;
   index: number;
 }
 
-export default function WatcherCard({ id, name, query, status, lastRunAt, index }: WatcherCardProps) {
+export default function WatcherCard({ id, name, query, status, lastRunAt, schedule, index }: WatcherCardProps) {
   // Optimistic UI could be added here, but for simplicity relying on server revalidation
   const [isDeleting, setIsDeleting] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const router = useRouter();
+
+  // Update current time every minute to keep next run time fresh
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
+
+  // Listen for time format changes
+  useEffect(() => {
+    const handleTimeFormatChange = () => {
+      setCurrentTime(new Date()); // Force re-render
+    };
+    window.addEventListener('time-format-changed', handleTimeFormatChange);
+    return () => window.removeEventListener('time-format-changed', handleTimeFormatChange);
+  }, []);
+
+  const nextRun = calculateNextRun(lastRunAt, schedule);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Only navigate if we didn't click a button
@@ -86,9 +108,16 @@ export default function WatcherCard({ id, name, query, status, lastRunAt, index 
       <p className="query">"{query}"</p>
 
       <div className="card-footer">
-        <span className="last-run">
-          {lastRunAt ? `Checked ${new Date(lastRunAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Never run'}
-        </span>
+        <div className="time-info">
+          <span className="last-run">
+            {lastRunAt ? `Checked ${formatTime(new Date(lastRunAt))}` : 'Never run'}
+          </span>
+          {nextRun && (
+            <span className="next-run">
+              Next: {formatTime(nextRun)}
+            </span>
+          )}
+        </div>
 
         <button
           onClick={handleToggle}
@@ -158,9 +187,21 @@ export default function WatcherCard({ id, name, query, status, lastRunAt, index 
           margin-top: auto;
         }
 
+        .time-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
         .last-run {
           font-size: 0.8rem;
           color: var(--text-muted);
+        }
+
+        .next-run {
+          font-size: 0.75rem;
+          color: var(--accent-primary);
+          font-weight: 500;
         }
 
         .toggle-btn {

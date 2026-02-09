@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { markResultAsRead } from '@/lib/history-actions';
-import { Check, ExternalLink } from 'lucide-react';
+import { markResultAsRead, markResultAsUnread } from '@/lib/history-actions';
+import { Check, ExternalLink, Undo } from 'lucide-react';
 import Image from 'next/image';
 
 interface Source {
@@ -36,6 +36,12 @@ export default function ResultCard({ id, watcherName, content, sources, foundAt,
         setMarkingRead(true);
         await markResultAsRead(id);
         // Optimistic UI handled by parent revalidation or just hiding it logic
+    };
+
+    const handleMarkUnread = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setMarkingRead(true);
+        await markResultAsUnread(id);
     };
 
     return (
@@ -150,6 +156,30 @@ export default function ResultCard({ id, watcherName, content, sources, foundAt,
                     >
                         <Check size={14} />
                         Mark as Read
+                    </button>
+                )}
+                {isRead && (
+                    <button
+                        onClick={handleMarkUnread}
+                        disabled={markingRead}
+                        className="mark-unread-btn"
+                        style={{
+                            marginLeft: 'auto',
+                            background: 'none',
+                            border: '1px solid hsl(0, 85%, 60%)',
+                            color: 'hsl(0, 85%, 60%)',
+                            borderRadius: '20px',
+                            padding: '4px 12px',
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            opacity: markingRead ? 0.5 : 1
+                        }}
+                    >
+                        <Undo size={14} />
+                        Mark as Unread
                     </button>
                 )}
             </div>

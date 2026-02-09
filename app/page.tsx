@@ -30,7 +30,7 @@ export default async function Home() {
 
   return (
     <div className="page-container">
-      <header className="dashboard-header sticky-header">
+      <header className="dashboard-header sticky-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div className="header-left">
           <div className="logo-container">
             <Image
@@ -44,8 +44,10 @@ export default async function Home() {
           </div>
           {userName && <p className="user-badge">Hello, {userName}</p>}
         </div>
-        <div className="header-right" style={{ display: 'flex', gap: '8px' }}>
-          <ManualCheckButton />
+
+        {/* Manual Check Button - Right side */}
+        <div style={{ paddingRight: '16px' }}>
+          {allWatchers.length > 0 && <ManualCheckButton />}
         </div>
       </header>
 
@@ -60,8 +62,12 @@ export default async function Home() {
           {allWatchers.map((watcher, idx) => (
             <WatcherCard
               key={watcher.id}
-              {...watcher}
+              id={watcher.id}
+              name={watcher.name}
+              query={watcher.query}
               status={watcher.status || 'active'}
+              lastRunAt={watcher.lastRunAt}
+              schedule={watcher.schedule || '0 * * * *'}
               index={idx}
             />
           ))}

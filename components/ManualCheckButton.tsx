@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { runManualCheck } from '@/lib/actions';
-import { Zap } from 'lucide-react';
+import { FastForward } from 'lucide-react';
 
 export default function ManualCheckButton() {
     const [loading, setLoading] = useState(false);
@@ -31,10 +31,20 @@ export default function ManualCheckButton() {
         <button
             onClick={handleCheck}
             disabled={loading}
-            className={`icon-btn ${loading ? 'spinning' : ''}`}
+            className={`${loading ? 'spinning' : ''}`}
+            style={{
+                border: 'none',
+                background: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                color: 'var(--accent-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                opacity: loading ? 0.5 : 1
+            }}
             title="Check All Watchers"
         >
-            <Zap size={20} />
+            <FastForward size={20} />
 
             {/* hidden status text for accessibility/debugging */}
             <span className="sr-only">{loading ? 'Running...' : 'Run Check'}</span>

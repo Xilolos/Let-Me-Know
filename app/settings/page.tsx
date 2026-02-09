@@ -11,6 +11,7 @@ export default function SettingsPage() {
     const [mounted, setMounted] = useState(false);
     const [amoledMode, setAmoledMode] = useState(false);
     const [searchInterval, setSearchInterval] = useState<number>(6);
+    const [timeFormat, setTimeFormat] = useState<'24hr' | '12hr'>('24hr');
 
     useEffect(() => {
         setMounted(true);
@@ -20,6 +21,9 @@ export default function SettingsPage() {
         // Load search interval preference
         const savedInterval = localStorage.getItem('lmk-interval');
         setSearchInterval(savedInterval ? parseInt(savedInterval) : 6);
+        // Load time format preference
+        const savedTimeFormat = localStorage.getItem('lmk-time-format');
+        setTimeFormat(savedTimeFormat === '12hr' ? '12hr' : '24hr');
     }, []);
 
     const toggleAmoled = () => {
@@ -34,6 +38,14 @@ export default function SettingsPage() {
         const value = parseInt(e.target.value);
         setSearchInterval(value);
         localStorage.setItem('lmk-interval', value.toString());
+    };
+
+    const handleTimeFormatChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value as '24hr' | '12hr';
+        setTimeFormat(value);
+        localStorage.setItem('lmk-time-format', value);
+        // Trigger event for components to pick up the change
+        window.dispatchEvent(new Event('time-format-changed'));
     };
 
     if (!mounted) {
@@ -69,6 +81,21 @@ export default function SettingsPage() {
                         <option value="6">Every 6 hours</option>
                         <option value="12">Every 12 hours</option>
                         <option value="24">Daily</option>
+                    </select>
+                </div>
+
+                <div className="setting-item">
+                    <div className="setting-label">
+                        <h3>Time Format</h3>
+                        <p>Display times in 24-hour or 12-hour format</p>
+                    </div>
+                    <select
+                        value={timeFormat}
+                        onChange={handleTimeFormatChange}
+                        className="interval-select"
+                    >
+                        <option value="24hr">24-hour (14:30)</option>
+                        <option value="12hr">12-hour (2:30 PM)</option>
                     </select>
                 </div>
             </div>
@@ -112,19 +139,17 @@ export default function SettingsPage() {
 
                 <div className="divider"></div>
 
-                <div className="setting-item">
+                <div className="setting-item" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div className="setting-label">
                         <h3>AMOLED Mode</h3>
                         <p>Use pure black when dark theme is active</p>
                     </div>
-                    <label className="toggle-switch">
-                        <input
-                            type="checkbox"
-                            checked={amoledMode}
-                            onChange={toggleAmoled}
-                        />
-                        <span className="toggle-slider"></span>
-                    </label>
+                    <input
+                        type="checkbox"
+                        checked={amoledMode}
+                        onChange={toggleAmoled}
+                        className="amoled-checkbox"
+                    />
                 </div>
 
                 <div className="divider"></div>
@@ -242,47 +267,12 @@ export default function SettingsPage() {
             background: white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 52px;
-            height: 28px;
-            cursor: pointer;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .toggle-slider {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 28px;
-            transition: 0.3s;
-        }
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
+        .amoled-checkbox {
             width: 20px;
-            left: 4px;
-            bottom: 3px;
-            background: var(--text-muted);
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-        input:checked + .toggle-slider {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-color: transparent;
-        }
-        input:checked + .toggle-slider:before {
-            transform: translateX(24px);
-            background: white;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
+            margin: 0;
         }
         .interval-select {
             padding: 10px 14px;
