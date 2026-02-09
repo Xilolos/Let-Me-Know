@@ -3,6 +3,7 @@
 import { updateWatcher } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
+import ExpandableTextarea from '@/components/ExpandableTextarea';
 
 export default function EditForm({ watcher }: { watcher: any }) {
     const router = useRouter();
@@ -34,10 +35,9 @@ export default function EditForm({ watcher }: { watcher: any }) {
 
             <div className="field-group">
                 <label htmlFor="query">What should I look for?</label>
-                <textarea
+                <ExpandableTextarea
                     name="query"
                     id="query"
-                    rows={3}
                     defaultValue={watcher.query}
                     required
                 />
