@@ -38,24 +38,22 @@ export default async function LogsPage({ searchParams }: LogsPageProps) {
 
     return (
         <div className="page-container">
-            <header className="dashboard-header sticky-header">
-                <h1>{isHistory ? 'History' : 'Updates'}</h1>
+            <header className="dashboard-header sticky-header" style={{ justifyContent: 'center', paddingTop: 'max(env(safe-area-inset-top), 20px)', paddingBottom: '16px', height: 'auto' }}>
+                <div className="tabs-container" style={{ margin: 0, border: 'none', justifyContent: 'center' }}>
+                    <Link
+                        href="/logs"
+                        className={`tab ${!isHistory ? 'active' : ''}`}
+                    >
+                        Updates
+                    </Link>
+                    <Link
+                        href="/logs?view=history"
+                        className={`tab ${isHistory ? 'active' : ''}`}
+                    >
+                        History
+                    </Link>
+                </div>
             </header>
-
-            <div className="tabs-container">
-                <Link
-                    href="/logs"
-                    className={`tab ${!isHistory ? 'active' : ''}`}
-                >
-                    Updates
-                </Link>
-                <Link
-                    href="/logs?view=history"
-                    className={`tab ${isHistory ? 'active' : ''}`}
-                >
-                    History
-                </Link>
-            </div>
 
             {allResults.length === 0 ? (
                 <div className="empty-state">
@@ -82,34 +80,32 @@ export default async function LogsPage({ searchParams }: LogsPageProps) {
             <style>{`
                 .tabs-container {
                     display: flex;
-                    margin-bottom: 20px;
-                    border-bottom: 1px solid var(--border-color);
-                    gap: 20px;
-                    padding: 0 4px;
+                    gap: 8px;
+                    background: var(--bg-secondary);
+                    padding: 4px;
+                    border-radius: 20px;
+                    border: 1px solid var(--border-color);
                 }
                 
                 .tab {
-                    padding: 10px 4px;
+                    padding: 6px 20px;
                     color: var(--text-muted);
                     text-decoration: none;
-                    font-size: 0.95rem;
-                    position: relative;
-                    transition: color 0.2s;
-                }
-                
-                .tab.active {
-                    color: var(--accent-primary);
+                    font-size: 0.9rem;
+                    border-radius: 16px;
+                    transition: all 0.2s;
                     font-weight: 500;
                 }
                 
-                .tab.active::after {
-                    content: '';
-                    position: absolute;
-                    bottom: -1px;
-                    left: 0;
-                    right: 0;
-                    height: 2px;
+                .tab.active {
                     background: var(--accent-primary);
+                    color: white;
+                    box-shadow: 0 0 15px var(--accent-primary);
+                }
+                
+                /* Remove old underline style */
+                .tab.active::after {
+                    display: none;
                 }
             `}</style>
         </div>
