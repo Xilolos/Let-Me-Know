@@ -2,7 +2,7 @@
 
 **Let Me Know** is an AI-powered personal web monitor that acts as your dedicated agent for tracking information online. Whether you're waiting for a product to come back in stock, monitoring news on a specific topic, or tracking schedule changes, **Let Me Know** handles it for you.
 
-Using advanced AI (Google Gemini), it intelligently parses web content to find exactly what you're looking for and notifies you the moment there's an update.
+Using advanced AI (Hugging Face via Meta Llama 3), it intelligently parses web content to find exactly what you're looking for and notifies you the moment there's an update.
 
 ## 🚀 Key Features
 
@@ -16,12 +16,12 @@ Using advanced AI (Google Gemini), it intelligently parses web content to find e
 
 | Dashboard | Create Watcher |
 |:---:|:---:|
-| ![Dashboard](./public/screenshots/home_page.webp) | ![Create](./public/screenshots/create_watcher_page.webp) |
+| ![Dashboard](./public/screenshots/home_page_v2.png) | ![Create](./public/screenshots/create_watcher_page_v2.png) |
 | **Track all your active watchers in one place.** | **Easily set up new monitors with natural language.** |
 
 | Results | Settings |
 |:---:|:---:|
-| ![Results](./public/screenshots/notifications_page.webp) | ![Settings](./public/screenshots/settings_page.webp) |
+| ![Results](./public/screenshots/notifications_page_v2.png) | ![Settings](./public/screenshots/settings_page_v2.png) |
 | **Review notifications and findings.** | **Customize intervals and app appearance.** |
 
 ## 🛠️ How It Works
@@ -33,7 +33,7 @@ Using advanced AI (Google Gemini), it intelligently parses web content to find e
 ## 💻 Tech Stack
 
 *   **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-*   **AI Engine**: [Google Gemini](https://deepmind.google/technologies/gemini/)
+*   **AI Engine**: [Hugging Face](https://huggingface.co/) (Meta Llama 3)
 *   **Database**: [SQLite](https://www.sqlite.org/) with [Drizzle ORM](https://orm.drizzle.team/)
 *   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 *   **Deployment**: Easy to deploy on Vercel or self-host.
@@ -60,7 +60,7 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 ### Environment Variables
 
-Make sure to set up your `.env.local` file with the necessary keys (e.g., `GOOGLE_API_KEY` for Gemini). See `.env.example` for reference.
+Make sure to set up your `.env.local` file with the necessary keys (e.g., `HUGGINGFACE_API_KEY`). See `.env.example` for reference.
 
 ## Learn More
 
