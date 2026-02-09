@@ -1,3 +1,5 @@
+'use client';
+
 import { createWatcher } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
