@@ -78,7 +78,7 @@ export async function processActiveWatchers(targetUserEmail?: string, targetWatc
                     const findings: { source: string; summary: string; link: string }[] = [];
 
                     // Scrape all URLs first
-                    const validSources: { url: string; content: string }[] = [];
+                    const validSources: { url: string; content: string; thumbnail?: string }[] = [];
 
                     // Limit to 5 URLs max for consensus to avoid token limits
                     const limitedUrls = urls.slice(0, 5);
@@ -96,7 +96,7 @@ export async function processActiveWatchers(targetUserEmail?: string, targetWatc
                                 }
                             }
 
-                            validSources.push({ url, content: scrapeResult.content });
+                            validSources.push({ url, content: scrapeResult.content, thumbnail: scrapeResult.thumbnail });
                         }
                         // Small delay to be polite
                         await new Promise(r => setTimeout(r, 1000));
@@ -116,12 +116,16 @@ export async function processActiveWatchers(targetUserEmail?: string, targetWatc
                                     url: s.url
                                 }));
 
+                                // Find best thumbnail (first non-null one)
+                                const thumbnail = validSources.find(s => s.thumbnail)?.thumbnail || null;
+
                                 await db.insert(results).values({
                                     watcherId: watcher.id,
                                     content: analysis.summary,
                                     sources: JSON.stringify(sourcesMeta),
                                     foundAt: new Date(),
                                     isRead: false,
+                                    thumbnail,
                                 });
                                 logs.push(`Consensus found for ${watcher.name}`);
 

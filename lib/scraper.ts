@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 
-export async function scrapeUrl(url: string): Promise<{ content: string; datePublished?: Date } | null> {
+export async function scrapeUrl(url: string): Promise<{ content: string; datePublished?: Date; thumbnail?: string } | null> {
     try {
         const response = await fetch(url, {
             headers: {
@@ -64,7 +64,7 @@ export async function scrapeUrl(url: string): Promise<{ content: string; datePub
             text = $('body').text();
         }
 
-        // Extract metadata for deduplication
+        // Extract metadata for deduplication and thumbnail
         let datePublished: Date | undefined;
         const dateStr = $('meta[property="article:published_time"]').attr('content') ||
             $('meta[name="date"]').attr('content') ||
@@ -77,9 +77,23 @@ export async function scrapeUrl(url: string): Promise<{ content: string; datePub
             }
         }
 
+        // Extract Thumbnail
+        let thumbnail = $('meta[property="og:image"]').attr('content') ||
+            $('meta[name="twitter:image"]').attr('content');
+
+        if (!thumbnail) {
+            // Fallback: Find the first substantial image in the article body
+            const firstImg = $(mainSelectors.join(', ')).find('img').first();
+            const src = firstImg.attr('src');
+            if (src && src.startsWith('http')) {
+                thumbnail = src;
+            }
+        }
+
         return {
             content: text.replace(/\s+/g, ' ').trim(),
-            datePublished
+            datePublished,
+            thumbnail
         };
     } catch (error) {
         console.error(`Scrape Error for ${url}:`, error);

@@ -21,4 +21,5 @@ export const results = sqliteTable('results', {
     sources: text('sources'), // JSON array of { name: string, url: string }
     foundAt: integer('found_at', { mode: 'timestamp' }).default(new Date()),
     isRead: integer('is_read', { mode: 'boolean' }).default(false),
+    thumbnail: text('thumbnail'), // URL of the main image
 });

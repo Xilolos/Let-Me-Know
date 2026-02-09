@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { runManualCheck } from '@/lib/actions';
-import { Maximize2 } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 export default function ManualCheckButton() {
     const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ export default function ManualCheckButton() {
             className={`icon-btn ${loading ? 'spinning' : ''}`}
             title="Check All Watchers"
         >
-            <Maximize2 size={20} />
+            <Zap size={20} />
 
             {/* hidden status text for accessibility/debugging */}
             <span className="sr-only">{loading ? 'Running...' : 'Run Check'}</span>
