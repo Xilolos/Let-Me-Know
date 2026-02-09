@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 
-export async function scrapeUrl(url: string) {
+export async function scrapeUrl(url: string): Promise<{ content: string; datePublished?: Date } | null> {
     try {
         const response = await fetch(url, {
             headers: {
@@ -59,12 +59,28 @@ export async function scrapeUrl(url: string) {
             }
         }
 
-        // Fallback to body if no main content found
+        // Falback to body if no main content found
         if (!text || text.length < 100) {
             text = $('body').text();
         }
 
-        return text.replace(/\s+/g, ' ').trim();
+        // Extract metadata for deduplication
+        let datePublished: Date | undefined;
+        const dateStr = $('meta[property="article:published_time"]').attr('content') ||
+            $('meta[name="date"]').attr('content') ||
+            $('time').attr('datetime');
+
+        if (dateStr) {
+            datePublished = new Date(dateStr);
+            if (isNaN(datePublished.getTime())) {
+                datePublished = undefined;
+            }
+        }
+
+        return {
+            content: text.replace(/\s+/g, ' ').trim(),
+            datePublished
+        };
     } catch (error) {
         console.error(`Scrape Error for ${url}:`, error);
         return null;

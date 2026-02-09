@@ -23,11 +23,22 @@ export async function createWatcher(formData: FormData) {
         return { error: 'You must be logged in' };
     }
 
+    // Generate search queries immediately
+    const { generateSearchQueries } = await import('./ai');
+    let searchQueries: string[] = [];
+    try {
+        searchQueries = await generateSearchQueries(query);
+    } catch (e) {
+        console.error('Failed to generate queries on create:', e);
+        searchQueries = [query];
+    }
+
     await db.insert(watchers).values({
         userEmail, // Save the owner
         name,
         query,
         urls: JSON.stringify(urls),
+        searchQueries: JSON.stringify(searchQueries),
         status: 'active',
     });
 
@@ -72,11 +83,27 @@ export async function updateWatcher(id: number, formData: FormData) {
 
     const urls = rawUrls ? rawUrls.split(',').map(u => u.trim()).filter(Boolean) : [];
 
+    // Regenerate queries if the topic changed
+    let searchQueries = undefined;
+    const existing = await db.query.watchers.findFirst({
+        where: eq(watchers.id, id),
+        columns: { query: true }
+    });
+
+    if (existing && existing.query !== query) {
+        const { generateSearchQueries } = await import('./ai');
+        try {
+            const qs = await generateSearchQueries(query);
+            searchQueries = JSON.stringify(qs);
+        } catch (e) { }
+    }
+
     await db.update(watchers)
         .set({
             name,
             query,
             urls: JSON.stringify(urls),
+            ...(searchQueries ? { searchQueries } : {})
         })
         .where(eq(watchers.id, id));
 
@@ -143,11 +170,12 @@ export async function testWatcher(id: number) {
 
     // 3. Scrape
     const { scrapeUrl } = await import('./scraper');
-    const content = await scrapeUrl(urlToCheck);
+    const result = await scrapeUrl(urlToCheck);
 
-    if (!content) {
+    if (!result || !result.content) {
         return { success: false, error: `Failed to scrape ${urlToCheck}`, logs };
     }
+    const { content } = result;
 
     // 4. Analyze
     const { analyzeContent } = await import('./ai');

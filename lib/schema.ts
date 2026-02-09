@@ -10,6 +10,7 @@ export const watchers = sqliteTable('watchers', {
     schedule: text('schedule').default('0 * * * *'), // Cron expression (default hourly)
     status: text('status').default('active'), // active, paused
     lastRunAt: integer('last_run_at', { mode: 'timestamp' }),
+    searchQueries: text('search_queries'), // JSON array of cached search queries
     createdAt: integer('created_at', { mode: 'timestamp' }).default(new Date()),
 });
 

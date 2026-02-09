@@ -42,7 +42,24 @@ export async function processActiveWatchers(targetUserEmail?: string) {
                 // B. If no URLs, use Smart Discovery
                 if (urls.length === 0) {
                     logs.push(`Auto-discovering for: ${watcher.query}`);
-                    const distinctQueries = await generateSearchQueries(watcher.query);
+
+                    let distinctQueries: string[] = [];
+                    // Use stored queries if available
+                    if (watcher.searchQueries) {
+                        try {
+                            const params = JSON.parse(watcher.searchQueries);
+                            if (Array.isArray(params) && params.length > 0) {
+                                distinctQueries = params;
+                                logs.push(`Using ${distinctQueries.length} saved queries`);
+                            }
+                        } catch (e) { }
+                    }
+
+                    // Fallback if no stored queries
+                    if (distinctQueries.length === 0) {
+                        distinctQueries = await generateSearchQueries(watcher.query);
+                        // Optional: Save them for next time? For now just use them.
+                    }
 
                     for (const q of distinctQueries) {
                         const foundLinks = await searchWeb(q);
@@ -64,9 +81,19 @@ export async function processActiveWatchers(targetUserEmail?: string) {
                     const limitedUrls = urls.slice(0, 5);
 
                     for (const url of limitedUrls) {
-                        const content = await scrapeUrl(url);
-                        if (content) {
-                            validSources.push({ url, content });
+                        const scrapeResult = await scrapeUrl(url);
+
+                        if (scrapeResult && scrapeResult.content) {
+                            // DEDUPLICATION CHECK
+                            // Check if the article is newer than the last run
+                            if (watcher.lastRunAt && scrapeResult.datePublished) {
+                                if (scrapeResult.datePublished <= watcher.lastRunAt) {
+                                    logs.push(`Skipping old article: ${url} (Date: ${scrapeResult.datePublished.toISOString()})`);
+                                    continue;
+                                }
+                            }
+
+                            validSources.push({ url, content: scrapeResult.content });
                         }
                         // Small delay to be polite
                         await new Promise(r => setTimeout(r, 1000));
