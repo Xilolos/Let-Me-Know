@@ -19,8 +19,6 @@ export default function MobileNav() {
 
   return (
     <nav className="mobile-nav">
-      {/* Frosted glass dock background */}
-      <div className="nav-dock"></div>
 
       {/* Account Tab (Left) */}
       <div

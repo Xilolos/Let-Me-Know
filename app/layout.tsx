@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import MobileNav from "@/components/MobileNav";
+import MobileNav from "@/components/BottomNav";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import ProgressBar from "@/components/ProgressBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
